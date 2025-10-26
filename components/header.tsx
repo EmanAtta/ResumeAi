@@ -130,29 +130,19 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   logoIconWrapper: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 100,
+    height: 40,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
     overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#fb7121',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 1,
-      },
-    }),
+   
   },
   logoImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width:110,
+    height: 70,
+    borderRadius: 16,
   },
   logoIcon: {
     width: 36,
@@ -160,11 +150,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#fb7121',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
+ 
   },
   logoText: {
     fontSize: 20,

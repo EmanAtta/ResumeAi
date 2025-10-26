@@ -10,7 +10,11 @@ import {
   Platform,
   Dimensions,
   RefreshControl,
+  Modal,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { WebView } from 'react-native-webview';
+import * as Sharing from 'expo-sharing';
 
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
@@ -20,29 +24,71 @@ import { useTheme } from '@/contexts/theme-context';
 import { usePdfs } from './_pdfHooks';
 import { PdfItem } from './_pdfServices';
 
-const { width } = Dimensions.get('window');
-const CARD_MARGIN = 16;
-const CARDS_PER_ROW = width > 768 ? 3 : width > 500 ? 2 : 1;
-const CARD_WIDTH = (width - CARD_MARGIN * (CARDS_PER_ROW + 1)) / CARDS_PER_ROW;
+const { width, height } = Dimensions.get('window');
+const CARD_MARGIN = 12;
+const CONTENT_PADDING = 20;
+const CARDS_PER_ROW = width > 768 ? 4 : width > 600 ? 3 : 2;
+const CARD_WIDTH = (width - (CONTENT_PADDING * 2) - (CARD_MARGIN * (CARDS_PER_ROW - 1))) / CARDS_PER_ROW;
 
 export default function TemplatesScreen() {
   const { colorScheme } = useTheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(9);
+  const [selectedPdf, setSelectedPdf] = useState<PdfItem | null>(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const { data, isLoading, error, refetch, isRefetching } = usePdfs(currentPage, pageSize);
 
-  const handleOpenPdf = async (url: string) => {
+  const handleOpenPdf = (pdf: PdfItem) => {
+    setSelectedPdf(pdf);
+    setShowPdfModal(true);
+  };
+
+  const handleClosePdfModal = () => {
+    setShowPdfModal(false);
+    setSelectedPdf(null);
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!selectedPdf) return;
+
     try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
+      setIsDownloading(true);
+
+      // Use Linking to open/download the PDF directly
+      // This works across all platforms
+      if (Platform.OS === 'web') {
+        // For web, create a download link
+        const link = document.createElement('a');
+        link.href = selectedPdf.pdfUrl;
+        link.download = `${selectedPdf.title}.pdf`;
+        link.click();
       } else {
-        console.error("Don't know how to open this URL:", url);
+        // For mobile, share the URL using the sharing API
+        const canShare = await Sharing.isAvailableAsync();
+        if (canShare) {
+          await Sharing.shareAsync(selectedPdf.pdfUrl, {
+            mimeType: 'application/pdf',
+            dialogTitle: `Download ${selectedPdf.title}`,
+            UTI: 'com.adobe.pdf',
+          });
+        } else {
+          // Fallback to opening in browser
+          await Linking.openURL(selectedPdf.pdfUrl);
+        }
       }
     } catch (err) {
-      console.error('Error opening PDF:', err);
+      console.error('Error downloading PDF:', err);
+      // Fallback to opening in browser
+      try {
+        await Linking.openURL(selectedPdf.pdfUrl);
+      } catch (linkErr) {
+        console.error('Error opening PDF link:', linkErr);
+      }
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -71,7 +117,7 @@ export default function TemplatesScreen() {
           borderColor: colorScheme === 'light' ? '#f0e5d6' : 'transparent',
         },
       ]}
-      onPress={() => handleOpenPdf(pdf.pdfUrl)}
+      onPress={() => handleOpenPdf(pdf)}
       activeOpacity={0.8}
     >
       {/* PDF Thumbnail */}
@@ -259,6 +305,87 @@ export default function TemplatesScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* PDF Viewer Modal */}
+      <Modal
+        visible={showPdfModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleClosePdfModal}
+      >
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          {/* Modal Header */}
+          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+            <TouchableOpacity
+              style={[styles.modalCloseButton, { backgroundColor: colors.backgroundSecondary }]}
+              onPress={handleClosePdfModal}
+            >
+              <Ionicons name="close" size={24} color={colors.text} />
+            </TouchableOpacity>
+
+            <ThemedText style={styles.modalTitle} numberOfLines={1}>
+              {selectedPdf?.title}
+            </ThemedText>
+
+            <TouchableOpacity
+              style={[styles.modalDownloadButton, { backgroundColor: colors.primary }]}
+              onPress={handleDownloadPdf}
+              disabled={isDownloading}
+            >
+              {isDownloading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Ionicons name="download" size={20} color="#fff" />
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* PDF Preview */}
+          <View style={styles.modalContent}>
+            {selectedPdf && (
+              <>
+                {/* WebView to display full PDF */}
+                <WebView
+                  source={{
+                    uri: `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(selectedPdf.pdfUrl)}`
+                  }}
+                  style={styles.webView}
+                  startInLoadingState={true}
+                  renderLoading={() => (
+                    <View style={styles.webViewLoading}>
+                      <ActivityIndicator size="large" color={colors.primary} />
+                      <ThemedText style={[styles.loadingText, { color: colors.textSecondary }]}>
+                        Loading PDF...
+                      </ThemedText>
+                    </View>
+                  )}
+                  scalesPageToFit={true}
+                  javaScriptEnabled={true}
+                  domStorageEnabled={true}
+                  originWhitelist={['*']}
+                  mixedContentMode="compatibility"
+                  setSupportMultipleWindows={false}
+                  onError={(syntheticEvent) => {
+                    const { nativeEvent } = syntheticEvent;
+                    console.warn('WebView error: ', nativeEvent);
+                  }}
+                />
+
+                {/* PDF Info Footer */}
+                <View style={[styles.pdfInfoFooter, { backgroundColor: colors.cardBackground, borderTopColor: colors.border }]}>
+                  <ThemedText style={[styles.pdfInfoText, { color: colors.textSecondary }]}>
+                    Created: {new Date(selectedPdf.createdAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </ThemedText>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -275,7 +402,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   content: {
-    padding: 20,
+    padding: CONTENT_PADDING,
   },
   headerSection: {
     marginBottom: 24,
@@ -357,7 +484,8 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: CARD_WIDTH * 1.4, // Aspect ratio for resume
+    padding:10,
+    height: CARD_WIDTH * 1.3, // Reduced aspect ratio
     position: 'relative',
     overflow: 'hidden',
   },
@@ -373,25 +501,25 @@ const styles = StyleSheet.create({
     height: '30%',
   },
   cardContent: {
-    padding: 16,
+    padding: 12,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '700',
-    marginBottom: 6,
-    lineHeight: 24,
+    marginBottom: 4,
+    lineHeight: 20,
   },
   cardDate: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
   },
   badge: {
     position: 'absolute',
-    top: 12,
-    right: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    top: 8,
+    right: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -406,7 +534,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
   // States
@@ -500,5 +628,66 @@ const styles = StyleSheet.create({
   pageText: {
     fontSize: 15,
     fontWeight: '600',
+  },
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingTop: Platform.OS === 'ios' ? 60 : 20,
+    borderBottomWidth: 1,
+  },
+  modalCloseButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '700',
+    marginHorizontal: 12,
+    textAlign: 'center',
+  },
+  modalDownloadButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalContent: {
+    flex: 1,
+  },
+  webView: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  webViewLoading: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  pdfInfoFooter: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    alignItems: 'center',
+  },
+  pdfInfoText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
 });

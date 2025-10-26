@@ -292,9 +292,9 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logoIconWrapper: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
+    width: 130,
+    height: 130,
+    borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
@@ -303,19 +303,19 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#fb7121',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
-        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.35,
+        shadowRadius: 20,
       },
       android: {
-        elevation: 8,
+        elevation: 10,
       },
     }),
   },
   logoImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
+    width: 130,
+    height: 130,
+    borderRadius: 30,
   },
   logoIcon: {
     width: 80,
