@@ -1,0 +1,169 @@
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { Colors } from '@/constants/theme';
+import { useTheme } from '@/contexts/theme-context';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+
+type HeaderProps = {
+  showBackButton?: boolean;
+  title?: string;
+  transparent?: boolean;
+};
+
+export function Header({ showBackButton = false, title, transparent = false }: HeaderProps) {
+  const { colorScheme, toggleTheme } = useTheme();
+  const colors = Colors[colorScheme ?? 'light'];
+  const router = useRouter();
+
+  return (
+    <View style={[
+      styles.headerWrapper,
+      transparent && styles.transparentHeader,
+      { backgroundColor: transparent ? 'transparent' : colors.background }
+    ]}>
+      <View style={[
+        styles.headerContainer,
+        !transparent && { borderBottomColor: colors.border }
+      ]}>
+        {/* Left Section */}
+        <View style={styles.leftSection}>
+          {showBackButton ? (
+            <TouchableOpacity
+              style={[styles.backButton, { backgroundColor: colors.backgroundSecondary }]}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <IconSymbol name="chevron.left" size={20} color={colors.text} />
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.logoContainer}>
+              <LinearGradient
+                colors={colors.gradientPrimary}
+                style={styles.logoIcon}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <IconSymbol name="doc.text.fill" size={20} color={colors.textInverse} />
+              </LinearGradient>
+              <Text style={[styles.logoText, { color: colors.text }]}>
+                Resume<Text style={{ color: colors.primary }}>AI</Text>
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Center Section - Title */}
+        {title && (
+          <View style={styles.centerSection}>
+            <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
+              {title}
+            </Text>
+          </View>
+        )}
+
+        {/* Right Section - Actions */}
+        <View style={styles.rightSection}>
+          <TouchableOpacity
+            style={[styles.iconButton, { backgroundColor: colors.backgroundSecondary }]}
+            activeOpacity={0.7}
+            onPress={toggleTheme}
+          >
+            <IconSymbol
+              name={colorScheme === 'dark' ? 'sun.max.fill' : 'moon.stars.fill'}
+              size={18}
+              color={colors.primary}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.iconButton, { backgroundColor: colors.backgroundSecondary }]}
+            activeOpacity={0.7}
+            onPress={() => router.push('/(auth)/signin')}
+          >
+            <IconSymbol name="person.fill" size={18} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  headerWrapper: {
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  transparentHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  leftSection: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  centerSection: {
+    flex: 2,
+    alignItems: 'center',
+  },
+  rightSection: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  logoIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#fb7121',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
