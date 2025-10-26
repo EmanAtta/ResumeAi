@@ -58,6 +58,8 @@ export const Colors = {
     backgroundSecondary: mutedOrange,
     surface: white,
     card: white,
+    cardBackground: white,
+    errorBackground: '#fee2e2',
 
     // Text
     text: foregroundDark,
@@ -122,6 +124,8 @@ export const Colors = {
     backgroundSecondary: cardDark,
     surface: cardDark,
     card: cardDark,
+    cardBackground: cardDark,
+    errorBackground: '#450a0a',
 
     // Text
     text: foregroundLight,

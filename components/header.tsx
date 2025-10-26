@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/contexts/theme-context';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Ionicons } from '@expo/vector-icons';
 
 type HeaderProps = {
   showBackButton?: boolean;
@@ -35,21 +35,20 @@ export function Header({ showBackButton = false, title, transparent = false }: H
               onPress={() => router.back()}
               activeOpacity={0.7}
             >
-              <IconSymbol name="chevron.left" size={20} color={colors.text} />
+              <Ionicons name="chevron-back" size={20} color={colors.text} />
             </TouchableOpacity>
           ) : (
             <View style={styles.logoContainer}>
-              <LinearGradient
-                colors={colors.gradientPrimary}
-                style={styles.logoIcon}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <IconSymbol name="doc.text.fill" size={20} color={colors.textInverse} />
-              </LinearGradient>
-              <Text style={[styles.logoText, { color: colors.text }]}>
+              <View style={styles.logoIconWrapper}>
+                <Image
+                  source={require('@/assets/images/AILogo.png')}
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
+              </View>
+              {/* <Text style={[styles.logoText, { color: colors.text }]}>
                 Resume<Text style={{ color: colors.primary }}>AI</Text>
-              </Text>
+              </Text> */}
             </View>
           )}
         </View>
@@ -70,8 +69,8 @@ export function Header({ showBackButton = false, title, transparent = false }: H
             activeOpacity={0.7}
             onPress={toggleTheme}
           >
-            <IconSymbol
-              name={colorScheme === 'dark' ? 'sun.max.fill' : 'moon.stars.fill'}
+            <Ionicons
+              name={colorScheme === 'dark' ? 'sunny' : 'moon'}
               size={18}
               color={colors.primary}
             />
@@ -82,7 +81,7 @@ export function Header({ showBackButton = false, title, transparent = false }: H
             activeOpacity={0.7}
             onPress={() => router.push('/(auth)/signin')}
           >
-            <IconSymbol name="person.fill" size={18} color={colors.primary} />
+            <Ionicons name="person" size={18} color={colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -129,6 +128,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  logoIconWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#fb7121',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
+  },
+  logoImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
   },
   logoIcon: {
     width: 36,

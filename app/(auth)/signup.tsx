@@ -10,13 +10,14 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/contexts/theme-context';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Ionicons } from '@expo/vector-icons';
 import { useSignup } from './utils/AutHooks';
 
 export default function SignUpScreen() {
@@ -159,20 +160,19 @@ export default function SignUpScreen() {
                 onPress={() => router.back()}
                 activeOpacity={0.7}
               >
-                <IconSymbol name="chevron.left" size={24} color={colors.text} />
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
             {/* Logo & Title */}
             <View style={styles.logoSection}>
-              <LinearGradient
-                colors={colors.gradientPrimary}
-                style={styles.logoIcon}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <IconSymbol name="doc.text.fill" size={40} color={colors.textInverse} />
-              </LinearGradient>
+              <View style={styles.logoIconWrapper}>
+                <Image
+                  source={require('@/assets/images/AILogo.png')}
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
+              </View>
               <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                 Join thousands of job seekers creating amazing resumes
@@ -193,7 +193,7 @@ export default function SignUpScreen() {
                     },
                   ]}
                 >
-                  <IconSymbol name="person.fill" size={20} color={colors.textSecondary} />
+                  <Ionicons name="person" size={20} color={colors.textSecondary} />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
                     placeholder="John Doe"
@@ -224,7 +224,7 @@ export default function SignUpScreen() {
                     },
                   ]}
                 >
-                  <IconSymbol name="envelope.fill" size={20} color={colors.textSecondary} />
+                  <Ionicons name="mail" size={20} color={colors.textSecondary} />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
                     placeholder="your.email@example.com"
@@ -256,7 +256,7 @@ export default function SignUpScreen() {
                     },
                   ]}
                 >
-                  <IconSymbol name="lock.fill" size={20} color={colors.textSecondary} />
+                  <Ionicons name="lock-closed" size={20} color={colors.textSecondary} />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
                     placeholder="Create a strong password"
@@ -271,8 +271,8 @@ export default function SignUpScreen() {
                     autoCorrect={false}
                   />
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)} activeOpacity={0.7}>
-                    <IconSymbol
-                      name={showPassword ? 'eye.slash.fill' : 'eye.fill'}
+                    <Ionicons
+                      name={showPassword ? 'eye-off' : 'eye'}
                       size={20}
                       color={colors.textSecondary}
                     />
@@ -295,7 +295,7 @@ export default function SignUpScreen() {
                     },
                   ]}
                 >
-                  <IconSymbol name="lock.fill" size={20} color={colors.textSecondary} />
+                  <Ionicons name="lock-closed" size={20} color={colors.textSecondary} />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
                     placeholder="Re-enter your password"
@@ -313,8 +313,8 @@ export default function SignUpScreen() {
                     onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                     activeOpacity={0.7}
                   >
-                    <IconSymbol
-                      name={showConfirmPassword ? 'eye.slash.fill' : 'eye.fill'}
+                    <Ionicons
+                      name={showConfirmPassword ? 'eye-off' : 'eye'}
                       size={20}
                       color={colors.textSecondary}
                     />
@@ -348,7 +348,7 @@ export default function SignUpScreen() {
                   ]}
                 >
                   {agreedToTerms && (
-                    <IconSymbol name="checkmark" size={16} color={colors.textInverse} />
+                    <Ionicons name="checkmark" size={16} color={colors.textInverse} />
                   )}
                 </View>
                 <Text style={[styles.termsText, { color: colors.textSecondary }]}>
@@ -386,7 +386,7 @@ export default function SignUpScreen() {
                       <Text style={[styles.signUpButtonText, { color: colors.textInverse }]}>
                         Create Account
                       </Text>
-                      <IconSymbol name="arrow.right" size={20} color={colors.textInverse} />
+                      <Ionicons name="arrow-forward" size={20} color={colors.textInverse} />
                     </>
                   )}
                 </LinearGradient>
@@ -440,6 +440,32 @@ const styles = StyleSheet.create({
   logoSection: {
     alignItems: 'center',
     marginBottom: 32,
+  },
+  logoIconWrapper: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#fb7121',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.3,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  logoImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
   },
   logoIcon: {
     width: 80,

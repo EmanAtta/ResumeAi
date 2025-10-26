@@ -10,13 +10,14 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/contexts/theme-context';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Ionicons } from '@expo/vector-icons';
 import { useLogin } from './utils/AutHooks';
 
 export default function SignInScreen() {
@@ -121,20 +122,19 @@ export default function SignInScreen() {
                 onPress={() => router.back()}
                 activeOpacity={0.7}
               >
-                <IconSymbol name="chevron.left" size={24} color={colors.text} />
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
             {/* Logo & Title */}
             <View style={styles.logoSection}>
-              <LinearGradient
-                colors={colors.gradientPrimary}
-                style={styles.logoIcon}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <IconSymbol name="doc.text.fill" size={40} color={colors.textInverse} />
-              </LinearGradient>
+              <View style={styles.logoIconWrapper}>
+                <Image
+                  source={require('@/assets/images/AILogo.png')}
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
+              </View>
               <Text style={[styles.title, { color: colors.text }]}>Welcome Back!</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                 Sign in to continue building amazing resumes
@@ -155,7 +155,7 @@ export default function SignInScreen() {
                     },
                   ]}
                 >
-                  <IconSymbol name="envelope.fill" size={20} color={colors.textSecondary} />
+                  <Ionicons name="mail" size={20} color={colors.textSecondary} />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
                     placeholder="your.email@example.com"
@@ -187,7 +187,7 @@ export default function SignInScreen() {
                     },
                   ]}
                 >
-                  <IconSymbol name="lock.fill" size={20} color={colors.textSecondary} />
+                  <Ionicons name="lock-closed" size={20} color={colors.textSecondary} />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
                     placeholder="Enter your password"
@@ -202,8 +202,8 @@ export default function SignInScreen() {
                     autoCorrect={false}
                   />
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)} activeOpacity={0.7}>
-                    <IconSymbol
-                      name={showPassword ? 'eye.slash.fill' : 'eye.fill'}
+                    <Ionicons
+                      name={showPassword ? 'eye-off' : 'eye'}
                       size={20}
                       color={colors.textSecondary}
                     />
@@ -236,7 +236,7 @@ export default function SignInScreen() {
                       <Text style={[styles.signInButtonText, { color: colors.textInverse }]}>
                         Sign In
                       </Text>
-                      <IconSymbol name="arrow.right" size={20} color={colors.textInverse} />
+                      <Ionicons name="arrow-forward" size={20} color={colors.textInverse} />
                     </>
                   )}
                 </LinearGradient>
@@ -290,6 +290,32 @@ const styles = StyleSheet.create({
   logoSection: {
     alignItems: 'center',
     marginBottom: 40,
+  },
+  logoIconWrapper: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#fb7121',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.3,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  logoImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
   },
   logoIcon: {
     width: 80,

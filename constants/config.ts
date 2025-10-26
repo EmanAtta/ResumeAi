@@ -35,6 +35,9 @@ export const Config = {
       list: '/api/templates/list',
       get: (id: string) => `/api/templates/${id}`,
     },
+    chat: {
+      pdfs: '/chat/pdfs',
+    },
   },
 
   // App Settings
