@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
@@ -57,35 +58,82 @@ export default function TemplatesScreen() {
     try {
       setIsDownloading(true);
 
-      // Use Linking to open/download the PDF directly
-      // This works across all platforms
       if (Platform.OS === 'web') {
-        // For web, create a download link
-        const link = document.createElement('a');
-        link.href = selectedPdf.pdfUrl;
-        link.download = `${selectedPdf.title}.pdf`;
-        link.click();
+        try {
+          const response = await fetch(selectedPdf.pdfUrl);
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${selectedPdf.title}.pdf`;
+          link.setAttribute('download', `${selectedPdf.title}.pdf`);
+          document.body.appendChild(link);
+          link.click();
+
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        } catch (fetchError) {
+          console.error('Fetch error:', fetchError);
+          const link = document.createElement('a');
+          link.href = selectedPdf.pdfUrl;
+          link.download = `${selectedPdf.title}.pdf`;
+          link.setAttribute('download', `${selectedPdf.title}.pdf`);
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
       } else {
-        // For mobile, share the URL using the sharing API
-        const canShare = await Sharing.isAvailableAsync();
-        if (canShare) {
-          await Sharing.shareAsync(selectedPdf.pdfUrl, {
-            mimeType: 'application/pdf',
-            dialogTitle: `Download ${selectedPdf.title}`,
-            UTI: 'com.adobe.pdf',
-          });
-        } else {
+        // For mobile, download the file first, then share it
+        const sanitizedTitle = selectedPdf.title.replace(/[^a-z0-9]/gi, '_');
+        const fileUri = `${FileSystem.documentDirectory}${sanitizedTitle}.pdf`;
+
+        try {
+          console.log('Downloading PDF to:', fileUri);
+
+          // Download the file to local storage
+          const downloadResult = await FileSystem.downloadAsync(
+            selectedPdf.pdfUrl,
+            fileUri
+          );
+
+          console.log('Download result:', downloadResult);
+          console.log('Downloaded file URI:', downloadResult.uri);
+
+          // Use downloadResult.uri which is guaranteed to have the correct file:// scheme
+          const localFileUri = downloadResult.uri;
+
+          const canShare = await Sharing.isAvailableAsync();
+          if (canShare) {
+            console.log('Sharing file from:', localFileUri);
+            await Sharing.shareAsync(localFileUri, {
+              mimeType: 'application/pdf',
+              dialogTitle: `Download ${selectedPdf.title}`,
+              UTI: 'com.adobe.pdf',
+            });
+          } else {
+            // Fallback: open in browser
+            console.log('Sharing not available, opening in browser');
+            await Linking.openURL(selectedPdf.pdfUrl);
+          }
+        } catch (downloadError) {
+          console.error('Download error:', downloadError);
           // Fallback to opening in browser
           await Linking.openURL(selectedPdf.pdfUrl);
         }
       }
     } catch (err) {
       console.error('Error downloading PDF:', err);
-      // Fallback to opening in browser
-      try {
-        await Linking.openURL(selectedPdf.pdfUrl);
-      } catch (linkErr) {
-        console.error('Error opening PDF link:', linkErr);
+      if (Platform.OS === 'web') {
+        window.open(selectedPdf.pdfUrl, '_blank');
+      } else {
+        try {
+          await Linking.openURL(selectedPdf.pdfUrl);
+        } catch (linkErr) {
+          console.error('Error opening PDF link:', linkErr);
+        }
       }
     } finally {
       setIsDownloading(false);
@@ -137,7 +185,7 @@ export default function TemplatesScreen() {
 
       {/* Card Content */}
       <View style={styles.cardContent}>
-        <ThemedText style={styles.cardTitle} numberOfLines={2}>
+        <ThemedText style={[styles.cardTitle, { color: colors.text }]} numberOfLines={2}>
           {pdf.title}
         </ThemedText>
         <ThemedText
@@ -345,31 +393,33 @@ export default function TemplatesScreen() {
             {selectedPdf && (
               <>
                 {/* WebView to display full PDF */}
-                <WebView
-                  source={{
-                    uri: `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(selectedPdf.pdfUrl)}`
-                  }}
-                  style={styles.webView}
-                  startInLoadingState={true}
-                  renderLoading={() => (
-                    <View style={styles.webViewLoading}>
-                      <ActivityIndicator size="large" color={colors.primary} />
-                      <ThemedText style={[styles.loadingText, { color: colors.textSecondary }]}>
-                        Loading PDF...
-                      </ThemedText>
-                    </View>
-                  )}
-                  scalesPageToFit={true}
-                  javaScriptEnabled={true}
-                  domStorageEnabled={true}
-                  originWhitelist={['*']}
-                  mixedContentMode="compatibility"
-                  setSupportMultipleWindows={false}
-                  onError={(syntheticEvent) => {
-                    const { nativeEvent } = syntheticEvent;
-                    console.warn('WebView error: ', nativeEvent);
-                  }}
-                />
+                <View style={styles.webViewContainer}>
+                  <WebView
+                    source={{
+                      uri: `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(selectedPdf.pdfUrl)}`
+                    }}
+                    style={styles.webView}
+                    startInLoadingState={true}
+                    renderLoading={() => (
+                      <View style={styles.webViewLoading}>
+                        <ActivityIndicator size="large" color={colors.primary} />
+                        <ThemedText style={[styles.loadingText, { color: colors.textSecondary }]}>
+                          Loading PDF...
+                        </ThemedText>
+                      </View>
+                    )}
+                    scalesPageToFit={true}
+                    javaScriptEnabled={true}
+                    domStorageEnabled={true}
+                    originWhitelist={['*']}
+                    mixedContentMode="compatibility"
+                    setSupportMultipleWindows={false}
+                    onError={(syntheticEvent) => {
+                      const { nativeEvent } = syntheticEvent;
+                      console.warn('WebView error: ', nativeEvent);
+                    }}
+                  />
+                </View>
 
                 {/* PDF Info Footer */}
                 <View style={[styles.pdfInfoFooter, { backgroundColor: colors.cardBackground, borderTopColor: colors.border }]}>
@@ -466,39 +516,39 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: 10,
     ...Platform.select({
       ios: {
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.12,
-        shadowRadius: 16,
+        shadowRadius: 8,
       },
       android: {
-        elevation: 4,
+        elevation: 2,
       },
-      web: {
-        boxShadow: '0 4px 20px rgba(251, 113, 33, 0.15)',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-      },
+     
     }),
   },
   imageContainer: {
     width: '100%',
-    padding:10,
-    height: CARD_WIDTH * 1.3, // Reduced aspect ratio
+    height: CARD_WIDTH * 1.3,
     position: 'relative',
     overflow: 'hidden',
+    padding:0,
   },
   thumbnail: {
     width: '100%',
     height: '100%',
+    borderRadius: 8,
+    marginHorizontal:2,
+    marginTop:10,
   },
   imageOverlay: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: '30%',
+    height: '25%',
   },
   cardContent: {
     padding: 12,
@@ -515,8 +565,8 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 10,
+    right: 2,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 16,
@@ -665,6 +715,11 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
+  },
+  webViewContainer: {
+    flex: 1,
+    padding: 16,
+    paddingTop: 20,
   },
   webView: {
     flex: 1,

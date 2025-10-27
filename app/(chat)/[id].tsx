@@ -10,6 +10,9 @@ import {
   Platform,
   Animated,
   ActivityIndicator,
+  Modal,
+  Linking,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -19,6 +22,10 @@ import { useTheme } from '@/contexts/theme-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useChatMessages, useSendMessage } from './_hooks';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
+import { WebView } from 'react-native-webview';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 
 type Message = {
   id: string;
@@ -40,6 +47,9 @@ export default function ChatScreen() {
   const { mutate: sendMessageMutation, isPending: isSending } = useSendMessage(chatId);
 
   const [inputText, setInputText] = useState('');
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState<string | null>(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const typingAnim = useRef(new Animated.Value(0)).current;
 
@@ -78,6 +88,96 @@ export default function ChatScreen() {
       ).start();
     }
   }, [isTyping]);
+
+  const handleOpenPdf = (pdfUrl: string) => {
+    setSelectedPdfUrl(pdfUrl);
+    setShowPdfModal(true);
+  };
+
+  const handleClosePdfModal = () => {
+    setShowPdfModal(false);
+    setSelectedPdfUrl(null);
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!selectedPdfUrl) return;
+
+    try {
+      setIsDownloading(true);
+
+      if (Platform.OS === 'web') {
+        try {
+          const response = await fetch(selectedPdfUrl);
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `Resume_${Date.now()}.pdf`;
+          link.setAttribute('download', `Resume_${Date.now()}.pdf`);
+          document.body.appendChild(link);
+          link.click();
+
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        } catch (fetchError) {
+          console.error('Fetch error:', fetchError);
+          const link = document.createElement('a');
+          link.href = selectedPdfUrl;
+          link.download = `Resume_${Date.now()}.pdf`;
+          link.setAttribute('download', `Resume_${Date.now()}.pdf`);
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      } else {
+        const fileUri = `${FileSystem.documentDirectory}Resume_${Date.now()}.pdf`;
+
+        try {
+          console.log('Downloading PDF to:', fileUri);
+
+          const downloadResult = await FileSystem.downloadAsync(
+            selectedPdfUrl,
+            fileUri
+          );
+
+          console.log('Download result:', downloadResult);
+          const localFileUri = downloadResult.uri;
+
+          const canShare = await Sharing.isAvailableAsync();
+          if (canShare) {
+            console.log('Sharing file from:', localFileUri);
+            await Sharing.shareAsync(localFileUri, {
+              mimeType: 'application/pdf',
+              dialogTitle: 'Download Resume',
+              UTI: 'com.adobe.pdf',
+            });
+          } else {
+            console.log('Sharing not available, opening in browser');
+            await Linking.openURL(selectedPdfUrl);
+          }
+        } catch (downloadError) {
+          console.error('Download error:', downloadError);
+          await Linking.openURL(selectedPdfUrl);
+        }
+      }
+    } catch (err) {
+      console.error('Error downloading PDF:', err);
+      if (Platform.OS === 'web') {
+        window.open(selectedPdfUrl, '_blank');
+      } else {
+        try {
+          await Linking.openURL(selectedPdfUrl);
+        } catch (linkErr) {
+          console.error('Error opening PDF link:', linkErr);
+        }
+      }
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const handleSend = () => {
     if (inputText.trim().length === 0) return;
@@ -123,6 +223,56 @@ export default function ChatScreen() {
               {item.content}
             </Text>
           </View>
+
+          {/* PDF Card - Display if pdfUrl exists */}
+          {item.pdfUrl && (
+            <View style={[styles.pdfCard, {
+              backgroundColor: colorScheme === 'light' ? '#fffcf5' : colors.cardBackground,
+              borderColor: colorScheme === 'light' ? '#f0e5d6' : colors.border,
+            }]}>
+              <View style={styles.pdfCardHeader}>
+                <View style={[styles.pdfIconContainer, { backgroundColor: colors.primary + '20' }]}>
+                  <Ionicons name="document-text" size={28} color={colors.primary} />
+                </View>
+                <View style={styles.pdfCardInfo}>
+                  <Text style={[styles.pdfCardTitle, { color: colors.text }]}>
+                    Your Resume is Ready!
+                  </Text>
+                  <Text style={[styles.pdfCardSubtitle, { color: colors.textSecondary }]}>
+                    PDF Document • Ready to view
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.pdfCardActions}>
+                <TouchableOpacity
+                  style={[styles.pdfActionButton, { backgroundColor: colors.background, borderColor: colors.border }]}
+                  onPress={() => handleOpenPdf(item.pdfUrl!)}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="eye-outline" size={18} color={colors.text} />
+                  <Text style={[styles.pdfActionButtonText, { color: colors.text }]}>
+                    View
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.pdfActionButton, { backgroundColor: colors.primary }]}
+                  onPress={() => {
+                    setSelectedPdfUrl(item.pdfUrl!);
+                    handleDownloadPdf();
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="download-outline" size={18} color="#fff" />
+                  <Text style={[styles.pdfActionButtonText, { color: '#fff' }]}>
+                    Download
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
           <Text style={[styles.messageTime, { color: colors.textSecondary, textAlign: isUser ? 'right' : 'left' }]}>
             {new Date(item.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
           </Text>
@@ -272,6 +422,91 @@ export default function ChatScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      {/* PDF Viewer Modal */}
+      <Modal
+        visible={showPdfModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleClosePdfModal}
+      >
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          {/* Modal Header */}
+          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+            <TouchableOpacity
+              style={[styles.modalCloseButton, { backgroundColor: colors.backgroundSecondary }]}
+              onPress={handleClosePdfModal}
+            >
+              <Ionicons name="close" size={24} color={colors.text} />
+            </TouchableOpacity>
+
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              Resume Preview
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.modalDownloadButton, { backgroundColor: colors.primary }]}
+              onPress={handleDownloadPdf}
+              disabled={isDownloading}
+            >
+              {isDownloading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Ionicons name="download" size={20} color="#fff" />
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* PDF Preview */}
+          <View style={styles.modalContent}>
+            {selectedPdfUrl && (
+              <>
+                <View style={styles.webViewContainer}>
+                  <WebView
+                    source={{
+                      uri: `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(selectedPdfUrl)}`
+                    }}
+                    style={styles.webView}
+                    startInLoadingState={true}
+                    renderLoading={() => (
+                      <View style={styles.webViewLoading}>
+                        <ActivityIndicator size="large" color={colors.primary} />
+                        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+                          Loading PDF...
+                        </Text>
+                      </View>
+                    )}
+                    scalesPageToFit={true}
+                    javaScriptEnabled={true}
+                    domStorageEnabled={true}
+                    originWhitelist={['*']}
+                    mixedContentMode="compatibility"
+                    setSupportMultipleWindows={false}
+                    onError={(syntheticEvent) => {
+                      const { nativeEvent } = syntheticEvent;
+                      console.warn('WebView error: ', nativeEvent);
+                    }}
+                  />
+                </View>
+
+                {/* Quick Actions Footer */}
+                <View style={[styles.pdfActionsFooter, { backgroundColor: colors.cardBackground, borderTopColor: colors.border }]}>
+                  <TouchableOpacity
+                    style={[styles.footerActionButton, { backgroundColor: colors.backgroundSecondary }]}
+                    onPress={() => selectedPdfUrl && Linking.openURL(selectedPdfUrl)}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="open-outline" size={20} color={colors.text} />
+                    <Text style={[styles.footerActionButtonText, { color: colors.text }]}>
+                      Open in Browser
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -458,5 +693,150 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  // PDF Card Styles
+  pdfCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    marginTop: 8,
+    maxWidth: '85%',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#fb7121',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: '0 2px 12px rgba(251, 113, 33, 0.1)',
+      },
+    }),
+  },
+  pdfCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 12,
+  },
+  pdfIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pdfCardInfo: {
+    flex: 1,
+  },
+  pdfCardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 2,
+    letterSpacing: 0.1,
+  },
+  pdfCardSubtitle: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  pdfCardActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  pdfActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 6,
+  },
+  pdfActionButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+  },
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingTop: Platform.OS === 'ios' ? 60 : 20,
+    borderBottomWidth: 1,
+  },
+  modalCloseButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '700',
+    marginHorizontal: 12,
+    textAlign: 'center',
+  },
+  modalDownloadButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalContent: {
+    flex: 1,
+  },
+  webViewContainer: {
+    flex: 1,
+    padding: 16,
+    paddingTop: 20,
+  },
+  webView: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  webViewLoading: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  pdfActionsFooter: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    alignItems: 'center',
+  },
+  footerActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    gap: 8,
+    minWidth: 200,
+  },
+  footerActionButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
 });
