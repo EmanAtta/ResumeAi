@@ -320,7 +320,13 @@ export default function ChatScreen() {
   return (
     <ThemedView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+      <View style={[
+        styles.header,
+        {
+          backgroundColor: colorScheme === 'light' ? colors.background : colors.cardBackground,
+          borderBottomColor: colors.border
+        }
+      ]}>
         <TouchableOpacity
           style={[styles.backButton, { backgroundColor: colors.backgroundSecondary }]}
           onPress={() => router.back()}
@@ -521,15 +527,43 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'android' ? 40 : 60,
-    paddingBottom: 16,
+    paddingBottom: 18,
     borderBottomWidth: 1,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#fb7121',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0 2px 12px rgba(251, 113, 33, 0.06)',
+      },
+    }),
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+      },
+    }),
   },
   headerCenter: {
     flex: 1,
@@ -556,11 +590,25 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   menuButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+      },
+    }),
   },
   keyboardView: {
     flex: 1,

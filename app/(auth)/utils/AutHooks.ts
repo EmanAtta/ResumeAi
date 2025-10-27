@@ -9,11 +9,19 @@ export const useLogin = () => {
       console.log('Login successful:', response);
       // Store auth token - handle nested data structure
       const token = (response as any)?.data?.token || response.token;
+      const user = (response as any)?.data?.user || response.user;
+
       if (token) {
         await AsyncStorage.setItem('authToken', token);
         console.log('Token stored successfully:', token.substring(0, 20) + '...');
       } else {
         console.warn('No token found in response:', response);
+      }
+
+      // Store user email
+      if (user?.email) {
+        await AsyncStorage.setItem('userEmail', user.email);
+        console.log('User email stored successfully');
       }
     },
     onError: (error) => {
@@ -39,11 +47,19 @@ export const useSignup = () => {
       console.log('Signup successful:', response);
       // Store auth token - handle nested data structure
       const token = (response as any)?.data?.token || response.token;
+      const user = (response as any)?.data?.user || response.user;
+
       if (token) {
         await AsyncStorage.setItem('authToken', token);
         console.log('Token stored successfully:', token.substring(0, 20) + '...');
       } else {
         console.warn('No token found in response:', response);
+      }
+
+      // Store user email
+      if (user?.email) {
+        await AsyncStorage.setItem('userEmail', user.email);
+        console.log('User email stored successfully');
       }
     },
     onError: (error) => {

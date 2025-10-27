@@ -202,7 +202,7 @@ export default function TemplatesScreen() {
 
       {/* View Badge */}
       <View style={[styles.badge, { backgroundColor: colors.tint }]}>
-        <ThemedText style={styles.badgeText}>View PDF</ThemedText>
+        <ThemedText style={[styles.badgeText, { color: '#fff' }]}>View PDF</ThemedText>
       </View>
     </TouchableOpacity>
   );
@@ -288,7 +288,7 @@ export default function TemplatesScreen() {
                 style={[styles.retryButton, { backgroundColor: colors.tint }]}
                 onPress={() => refetch()}
               >
-                <ThemedText style={styles.retryButtonText}>Retry</ThemedText>
+                <ThemedText style={[styles.retryButtonText, { color: '#fff' }]}>Retry</ThemedText>
               </TouchableOpacity>
             </View>
           )}
@@ -371,7 +371,7 @@ export default function TemplatesScreen() {
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
 
-            <ThemedText style={styles.modalTitle} numberOfLines={1}>
+            <ThemedText style={[styles.modalTitle, { color: colors.text }]} numberOfLines={1}>
               {selectedPdf?.title}
             </ThemedText>
 

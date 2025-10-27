@@ -128,13 +128,11 @@ export default function SignInScreen() {
 
             {/* Logo & Title */}
             <View style={styles.logoSection}>
-              <View style={styles.logoIconWrapper}>
                 <Image
                   source={require('@/assets/images/AILogo.png')}
                   style={styles.logoImage}
                   resizeMode="contain"
                 />
-              </View>
               <Text style={[styles.title, { color: colors.text }]}>Welcome Back!</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                 Sign in to continue building amazing resumes
@@ -281,11 +279,25 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: '0 3px 12px rgba(0, 0, 0, 0.1)',
+      },
+    }),
   },
   logoSection: {
     alignItems: 'center',
@@ -358,10 +370,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
+    paddingVertical: 16,
+    borderRadius: 14,
+    borderWidth: 1.5,
     gap: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.04,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 1,
+      },
+      web: {
+        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
+      },
+    }),
   },
   input: {
     flex: 1,
@@ -385,14 +411,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
-    shadowColor: '#fb7121',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
+    paddingVertical: 18,
+    borderRadius: 14,
+    gap: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#fb7121',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.35,
+        shadowRadius: 20,
+      },
+      android: {
+        elevation: 8,
+      },
+      web: {
+        boxShadow: '0 8px 24px rgba(251, 113, 33, 0.35)',
+      },
+    }),
   },
   signInButtonText: {
     fontSize: 17,

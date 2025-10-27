@@ -21,11 +21,16 @@ export function Header({ showBackButton = false, title, transparent = false }: H
     <View style={[
       styles.headerWrapper,
       transparent && styles.transparentHeader,
-      { backgroundColor: transparent ? 'transparent' : colors.background }
+      {
+        backgroundColor: transparent ? 'transparent' : colors.background,
+      }
     ]}>
       <View style={[
         styles.headerContainer,
-        !transparent && { borderBottomColor: colors.border }
+        !transparent && {
+          borderBottomColor: colorScheme === 'light' ? colors.border : colors.border,
+          backgroundColor: colorScheme === 'light' ? colors.background : colors.cardBackground,
+        }
       ]}>
         {/* Left Section */}
         <View style={styles.leftSection}>
@@ -35,7 +40,7 @@ export function Header({ showBackButton = false, title, transparent = false }: H
               onPress={() => router.back()}
               activeOpacity={0.7}
             >
-              <Ionicons name="chevron-back" size={20} color={colors.text} />
+              <Ionicons name="chevron-back" size={22} color={colors.text} />
             </TouchableOpacity>
           ) : (
             <View style={styles.logoContainer}>
@@ -71,17 +76,9 @@ export function Header({ showBackButton = false, title, transparent = false }: H
           >
             <Ionicons
               name={colorScheme === 'dark' ? 'sunny' : 'moon'}
-              size={18}
+              size={20}
               color={colors.primary}
             />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: colors.backgroundSecondary }]}
-            activeOpacity={0.7}
-            onPress={() => router.push('/(auth)/signin')}
-          >
-            <Ionicons name="person" size={18} color={colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -91,11 +88,11 @@ export function Header({ showBackButton = false, title, transparent = false }: H
 
 const styles = StyleSheet.create({
   headerWrapper: {
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    paddingTop: Platform.OS === 'ios' ? 50 : Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0,
   },
   transparentHeader: {
     position: 'absolute',
-    top: 0,
+    top: 50,
     left: 0,
     right: 0,
     zIndex: 100,
@@ -106,7 +103,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
   },
   leftSection: {
     flex: 1,
@@ -122,7 +119,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: 8,
+    gap: 10,
   },
   logoContainer: {
     flexDirection: 'row',
@@ -163,17 +160,45 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+      },
+    }),
   },
   iconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+      },
+    }),
   },
 });

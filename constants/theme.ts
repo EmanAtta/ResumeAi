@@ -30,12 +30,12 @@ const foregroundDark = '#1a1209'; // hsl(20, 14%, 10%)
 const mutedForeground = '#6b5d47'; // hsl(25, 10%, 45%)
 const borderLight = '#f0e5d6'; // hsl(33, 30%, 90%)
 
-// Neutral Colors - Dark Mode
-const backgroundDark = '#100c08'; // hsl(20, 30%, 8%)
-const cardDark = '#1a1410'; // hsl(20, 25%, 12%)
+// Neutral Colors - Dark Mode (Brown-Dark Theme)
+const backgroundDark = '#1c1410'; // hsl(30, 30%, 10%) - Warm dark brown
+const cardDark = '#2a231c'; // hsl(30, 25%, 14%) - Medium dark brown
 const foregroundLight = '#fffcf5'; // hsl(33, 100%, 98%)
-const mutedForegroundDark = '#998f80'; // hsl(25, 10%, 60%)
-const borderDark = '#2e2620'; // hsl(20, 25%, 20%)
+const mutedForegroundDark = '#a89a88'; // hsl(30, 15%, 60%) - Warm muted
+const borderDark = '#3d342a'; // hsl(30, 20%, 20%) - Brown border
 
 // Semantic Colors
 const success = '#10b981'; // Green for success
@@ -125,7 +125,7 @@ export const Colors = {
     surface: cardDark,
     card: cardDark,
     cardBackground: cardDark,
-    errorBackground: '#450a0a',
+    errorBackground: '#3d2020',
 
     // Text
     text: foregroundLight,
@@ -136,8 +136,8 @@ export const Colors = {
     // UI Elements
     border: borderDark,
     divider: borderDark,
-    shadow: 'rgba(0, 0, 0, 0.3)',
-    overlay: 'rgba(0, 0, 0, 0.7)',
+    shadow: 'rgba(28, 20, 16, 0.4)',
+    overlay: 'rgba(28, 20, 16, 0.8)',
     input: borderDark,
     ring: primaryOrange,
 
@@ -171,7 +171,7 @@ export const Colors = {
 
     // Gradients
     gradientPrimary: [primaryOrange, accentOrange],
-    gradientHero: [backgroundDark, cardDark],
+    gradientHero: ['#1c1410', '#2a231c'],
     gradientAccent: [primaryOrange, '#f4a04d'],
 
     // Popover
