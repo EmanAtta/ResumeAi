@@ -132,21 +132,7 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.optionCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
-          activeOpacity={0.7}
-        >
-          <View style={[styles.optionIconContainer, { backgroundColor: '#3b82f6' + '15' }]}>
-            <Ionicons name="settings" size={24} color="#3b82f6" />
-          </View>
-          <View style={styles.optionContent}>
-            <Text style={[styles.optionTitle, { color: colors.text }]}>Settings</Text>
-            <Text style={[styles.optionDescription, { color: colors.textSecondary }]}>
-              Manage your preferences
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-        </TouchableOpacity>
+       
       </View>
 
       {/* Logout Button */}

@@ -4,20 +4,26 @@ import React from 'react';
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/contexts/theme-context';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useTheme();
   const colors = Colors[colorScheme ?? 'light'];
+
+  // Define colors explicitly based on theme
+  const tabBarActiveTintColor = '#fb7121'; // Orange
+  const tabBarInactiveTintColor = colorScheme === 'light' ? '#998f80' : '#a89a88';
+  const tabBarBackgroundColor = colorScheme === 'light' ? '#ffffff' : '#2a231c';
+  const tabBarBorderColor = colorScheme === 'light' ? '#f0e5d6' : '#3d342a';
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colorScheme === 'light' ? '#6b5d47' : colors.textSecondary,
+        tabBarActiveTintColor: tabBarActiveTintColor,
+        tabBarInactiveTintColor: tabBarInactiveTintColor,
         tabBarStyle: {
-          backgroundColor: colorScheme === 'light' ? '#ffffff' : colors.cardBackground,
-          borderTopColor: colorScheme === 'light' ? '#f0e5d6' : colors.border,
+          backgroundColor: tabBarBackgroundColor,
+          borderTopColor: tabBarBorderColor,
           borderTopWidth: 1,
           paddingTop: 8,
           paddingBottom: 8,

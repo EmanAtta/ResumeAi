@@ -230,7 +230,7 @@ export default function TemplatesScreen() {
         <View style={styles.content}>
           {/* Header Section */}
           <View style={styles.headerSection}>
-            <ThemedText type="title" style={styles.title}>
+            <ThemedText type="title" style={[styles.title, { color: colors.text }]}>
               Resume Templates
             </ThemedText>
             <ThemedText style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -297,7 +297,7 @@ export default function TemplatesScreen() {
           {!isLoading && !error && data?.data.items.length === 0 && (
             <View style={styles.emptyContainer}>
               <ThemedText style={styles.emptyEmoji}>📄</ThemedText>
-              <ThemedText style={styles.emptyTitle}>No Templates Yet</ThemedText>
+              <ThemedText style={[styles.emptyTitle, { color: colors.text }]}>No Templates Yet</ThemedText>
               <ThemedText style={[styles.emptyText, { color: colors.textSecondary }]}>
                 Create your first resume to see it here
               </ThemedText>
@@ -325,7 +325,7 @@ export default function TemplatesScreen() {
                     onPress={handlePrevPage}
                     disabled={currentPage === 1}
                   >
-                    <ThemedText style={styles.paginationButtonText}>← Previous</ThemedText>
+                    <ThemedText style={[styles.paginationButtonText, { color: colors.text }]}>← Previous</ThemedText>
                   </TouchableOpacity>
 
                   <View style={styles.pageInfo}>
@@ -345,7 +345,7 @@ export default function TemplatesScreen() {
                     onPress={handleNextPage}
                     disabled={currentPage === data.data.meta.totalPages}
                   >
-                    <ThemedText style={styles.paginationButtonText}>Next →</ThemedText>
+                    <ThemedText style={[styles.paginationButtonText, { color: colors.text }]}>Next →</ThemedText>
                   </TouchableOpacity>
                 </View>
               )}

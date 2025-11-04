@@ -256,7 +256,7 @@ export default function ChatScreen() {
                   </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
+                {/* <TouchableOpacity
                   style={[styles.pdfActionButton, { backgroundColor: colors.primary }]}
                   onPress={() => {
                     setSelectedPdfUrl(item.pdfUrl!);
@@ -268,7 +268,7 @@ export default function ChatScreen() {
                   <Text style={[styles.pdfActionButtonText, { color: '#fff' }]}>
                     Download
                   </Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
             </View>
           )}
@@ -363,8 +363,8 @@ export default function ChatScreen() {
       {/* Messages */}
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 140 : 0}
       >
         {isLoading ? (
           <View style={styles.loadingContainer}>
@@ -389,6 +389,7 @@ export default function ChatScreen() {
             showsVerticalScrollIndicator={false}
             ListFooterComponent={isTyping ? renderTypingIndicator : null}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            keyboardDismissMode="interactive"
           />
         )}
 
@@ -403,6 +404,8 @@ export default function ChatScreen() {
               onChangeText={setInputText}
               multiline
               maxLength={500}
+              returnKeyType="default"
+              blurOnSubmit={false}
             />
             <TouchableOpacity
               style={styles.attachButton}
@@ -616,7 +619,8 @@ const styles = StyleSheet.create({
   messagesList: {
     paddingHorizontal: 20,
     paddingVertical: 16,
-    paddingBottom: 8,
+    paddingBottom: 16,
+    flexGrow: 1,
   },
   messageContainer: {
     flexDirection: 'row',
@@ -680,8 +684,20 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingHorizontal: 20,
     paddingVertical: 12,
+    paddingBottom: Platform.OS === 'ios' ? 12 : 12,
     borderTopWidth: 1,
     gap: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   inputWrapper: {
     flex: 1,

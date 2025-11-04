@@ -126,13 +126,8 @@ export default function SignInScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Logo & Title */}
             <View style={styles.logoSection}>
-                <Image
-                  source={require('@/assets/images/AILogo.png')}
-                  style={styles.logoImage}
-                  resizeMode="contain"
-                />
+              
               <Text style={[styles.title, { color: colors.text }]}>Welcome Back!</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
                 Sign in to continue building amazing resumes

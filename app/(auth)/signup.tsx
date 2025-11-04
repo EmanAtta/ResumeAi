@@ -164,13 +164,8 @@ export default function SignUpScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Logo & Title */}
             <View style={styles.logoSection}>
-                <Image
-                  source={require('@/assets/images/AILogo.png')}
-                  style={styles.logoImage}
-                  resizeMode="contain"
-                />
+              
 
               <Text style={[styles.title, { color: colors.text }]}>Create Account</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
