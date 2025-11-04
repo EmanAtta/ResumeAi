@@ -13,6 +13,7 @@ import {
   Modal,
   Linking,
   Dimensions,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -355,8 +356,31 @@ export default function ChatScreen() {
         <TouchableOpacity
           style={[styles.menuButton, { backgroundColor: colors.backgroundSecondary }]}
           activeOpacity={0.7}
+          onPress={async () => {
+            const token = await AsyncStorage.getItem('authToken');
+            if (token) {
+              Alert.alert(
+                'Logout',
+                'Are you sure you want to logout?',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Logout',
+                    style: 'destructive',
+                    onPress: async () => {
+                      await AsyncStorage.removeItem('authToken');
+                      await AsyncStorage.removeItem('userEmail');
+                      await AsyncStorage.removeItem('userName');
+                      router.replace('/(tabs)');
+                    },
+                  },
+                ],
+                { cancelable: true }
+              );
+            }
+          }}
         >
-          <IconSymbol name="ellipsis" size={20} color={colors.text} />
+          <Ionicons name="log-out-outline" size={20} color={colors.error} />
         </TouchableOpacity>
       </View>
 

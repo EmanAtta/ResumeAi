@@ -14,6 +14,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/contexts/theme-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Ionicons } from '@expo/vector-icons';
 import { Header } from '@/components/header';
 import { useChats } from './_hooks';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -130,13 +131,13 @@ export default function ChatListScreen() {
         colors={[colors.primary + '20', colors.primary + '05']}
         style={styles.emptyIcon}
       >
-        <IconSymbol name="message.fill" size={64} color={colors.primary} />
+        <Ionicons name="chatbubbles" size={64} color={colors.primary} />
       </LinearGradient>
       <Text style={[styles.emptyTitle, { color: colors.text }]}>No conversations yet</Text>
       <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
         Start a new chat to create your resume with AI
       </Text>
-     
+
     </View>
   );
 
@@ -152,7 +153,7 @@ export default function ChatListScreen() {
             { backgroundColor: colors.backgroundSecondary, borderColor: colors.border },
           ]}
         >
-          <IconSymbol name="magnifyingglass" size={20} color={colors.textSecondary} />
+          <Ionicons name="search-outline" size={20} color={colors.textSecondary} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
             placeholder="Search conversations..."
@@ -162,7 +163,7 @@ export default function ChatListScreen() {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')} activeOpacity={0.7}>
-              <IconSymbol name="xmark.circle.fill" size={20} color={colors.textSecondary} />
+              <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
         </View>
@@ -176,7 +177,7 @@ export default function ChatListScreen() {
         </View>
       ) : isError ? (
         <View style={styles.errorContainer}>
-          <IconSymbol name="exclamationmark.triangle.fill" size={48} color={colors.error} />
+          <Ionicons name="alert-circle" size={64} color={colors.error} />
           <Text style={[styles.errorText, { color: colors.text }]}>Failed to load chats</Text>
           <Text style={[styles.errorSubtext, { color: colors.textSecondary }]}>
             {error?.message || 'Please try again later'}
@@ -193,26 +194,21 @@ export default function ChatListScreen() {
         />
       )}
 
-      {/* Floating New Chat Button */}
-      {conversations.length > 0 && (
-        <TouchableOpacity
-          style={styles.fabContainer}
-          activeOpacity={0.7}
-          onPress={handleNewChat}
+      {/* Floating New Chat Button - Always visible */}
+      <TouchableOpacity
+        style={styles.fabContainer}
+        activeOpacity={0.8}
+        onPress={handleNewChat}
+      >
+        <LinearGradient
+          colors={colors.gradientPrimary}
+          style={styles.fab}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
         >
-          <LinearGradient
-            colors={colors.gradientPrimary}
-            style={styles.fab}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <View style={styles.fabContent}>
-              <Text style={[styles.fabText, { color: '#FFFFFF' }]}>New Chat</Text>
-                <IconSymbol name="plus.circle.fill" size={20} color="#FFFFFF" />
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-      )}
+          <Ionicons name="add" size={32} color="#fff" />
+        </LinearGradient>
+      </TouchableOpacity>
     </ThemedView>
   );
 }
@@ -356,37 +352,20 @@ const styles = StyleSheet.create({
   },
   fabContainer: {
     position: 'absolute',
-    right: 30,
+    right: 24,
     bottom: 60,
   },
   fab: {
-    borderRadius: 16,
-    shadowColor: '#fb7121',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  fabContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingLeft: 20,
-    paddingRight: 12,
-    paddingVertical: 14,
-    gap: 12,
-  },
-  fabText: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  fabIconWrapper: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#fb7121',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    elevation: 12,
   },
   loadingContainer: {
     flex: 1,
