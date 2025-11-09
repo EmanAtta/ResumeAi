@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar, Image, Alert, Modal, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar, Image, Modal } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/theme';
@@ -22,6 +22,7 @@ export function Header({ showBackButton = false, title, transparent = false, onA
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -50,37 +51,29 @@ export function Header({ showBackButton = false, title, transparent = false, onA
 
   const handleLogout = () => {
     setShowUserMenu(false);
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await AsyncStorage.removeItem('authToken');
-              await AsyncStorage.removeItem('userEmail');
-              await AsyncStorage.removeItem('userName');
-              setIsLoggedIn(false);
-              setUserEmail('');
-              setUserName('');
-              if (onAuthChange) {
-                onAuthChange();
-              }
-              router.replace('/(tabs)');
-            } catch (error) {
-              console.error('Error logging out:', error);
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = async () => {
+    setShowLogoutDialog(false);
+    try {
+      await AsyncStorage.removeItem('authToken');
+      await AsyncStorage.removeItem('userEmail');
+      await AsyncStorage.removeItem('userName');
+      setIsLoggedIn(false);
+      setUserEmail('');
+      setUserName('');
+      if (onAuthChange) {
+        onAuthChange();
+      }
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutDialog(false);
   };
 
   return (
@@ -167,7 +160,7 @@ export function Header({ showBackButton = false, title, transparent = false, onA
             >
               <LinearGradient
                 colors={colors.gradientPrimary}
-                style={styles.loginIconGradient}
+                style={styles.loginIconGradient}azsaZXX
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
@@ -228,6 +221,61 @@ export function Header({ showBackButton = false, title, transparent = false, onA
             </View>
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Logout Confirmation Dialog */}
+      <Modal
+        visible={showLogoutDialog}
+        transparent
+        animationType="fade"
+        onRequestClose={cancelLogout}
+      >
+        <View style={styles.dialogBackdrop}>
+          <View style={[styles.dialogContainer, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+            {/* Icon */}
+            <View style={[styles.dialogIconContainer, { backgroundColor: colors.error + '15' }]}>
+              <Ionicons name="log-out-outline" size={40} color={colors.error} />
+            </View>
+
+            {/* Title */}
+            <Text style={[styles.dialogTitle, { color: colors.text }]}>
+              Logout
+            </Text>
+
+            {/* Message */}
+            <Text style={[styles.dialogMessage, { color: colors.textSecondary }]}>
+              Are you sure you want to logout? You'll need to sign in again to access your chats.
+            </Text>
+
+            {/* Buttons */}
+            <View style={styles.dialogButtons}>
+              {/* Cancel Button */}
+              <TouchableOpacity
+                style={[styles.dialogButton, styles.cancelButton, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}
+                activeOpacity={0.7}
+                onPress={cancelLogout}
+              >
+                <Text style={[styles.cancelButtonText, { color: colors.text }]}>Cancel</Text>
+              </TouchableOpacity>
+
+              {/* Logout Button */}
+              <TouchableOpacity
+                style={styles.dialogButton}
+                activeOpacity={0.8}
+                onPress={confirmLogout}
+              >
+                <LinearGradient
+                  colors={['#ef4444', '#dc2626']}
+                  style={styles.logoutButtonGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={styles.logoutButtonText}>Logout</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </View>
   );
@@ -476,5 +524,102 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     letterSpacing: 0.2,
+  },
+  // Logout Dialog Styles
+  dialogBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  dialogContainer: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 24,
+    padding: 28,
+    borderWidth: 1,
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.3,
+        shadowRadius: 24,
+      },
+      android: {
+        elevation: 12,
+      },
+      web: {
+        boxShadow: '0 12px 48px rgba(0, 0, 0, 0.3)',
+      },
+    }),
+  },
+  dialogIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  dialogTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    marginBottom: 12,
+    letterSpacing: 0.3,
+  },
+  dialogMessage: {
+    fontSize: 15,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 28,
+    paddingHorizontal: 8,
+  },
+  dialogButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    gap: 12,
+  },
+  dialogButton: {
+    flex: 1,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  cancelButton: {
+    borderWidth: 1,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  logoutButtonGradient: {
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#ef4444',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 6,
+      },
+      web: {
+        boxShadow: '0 4px 16px rgba(239, 68, 68, 0.4)',
+      },
+    }),
+  },
+  logoutButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 0.3,
   },
 });

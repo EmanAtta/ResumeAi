@@ -43,7 +43,7 @@ export const getPdfs = async (page: number = 1, pageSize: number = 9): Promise<P
     const token = await AsyncStorage.getItem('authToken');
 
     if (!token) {
-      throw new Error('No authentication token found. Please login.');
+      throw new Error('No Data Found , please login.');
     }
 
     // Build URL with query parameters
@@ -85,7 +85,7 @@ export const getPdfById = async (id: string): Promise<PdfItem> => {
     const token = await AsyncStorage.getItem('authToken');
 
     if (!token) {
-      throw new Error('No authentication token found. Please login.');
+      throw new Error('No Data Found , please login.');
     }
 
     const url = buildApiUrl(`${Config.endpoints.chat.pdfs}/${id}`);

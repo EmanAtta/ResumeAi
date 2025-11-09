@@ -1,0 +1,46 @@
+# Node modules - EAS will install these fresh
+node_modules/
+
+# Build artifacts
+dist/
+build/
+web-build/
+.expo/
+.expo-shared/
+
+# iOS and Android native folders (for managed workflow)
+ios/
+android/
+
+# Expo generated files
+expo-env.d.ts
+
+# Development files
+.DS_Store
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Environment files
+.env
+.env*.local
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# TypeScript
+*.tsbuildinfo
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Metro
+.metro-health-check*

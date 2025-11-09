@@ -352,13 +352,13 @@ const styles = StyleSheet.create({
   },
   fabContainer: {
     position: 'absolute',
-    right: 24,
-    bottom: 60,
+    right: 28,
+    bottom: 80,
   },
   fab: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 60,
+    height: 60,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#fb7121',
