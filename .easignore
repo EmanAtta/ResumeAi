@@ -1,5 +1,12 @@
-# Node modules - EAS will install these fresh
+# Dependencies - EAS will install these fresh
+node_modules/**/*
 node_modules/
+**/node_modules/
+
+# Lock files - EAS will regenerate
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # Build artifacts
 dist/
@@ -7,40 +14,60 @@ build/
 web-build/
 .expo/
 .expo-shared/
+**/.expo/
+**/.expo-shared/
 
 # iOS and Android native folders (for managed workflow)
 ios/
 android/
+**/ios/
+**/android/
 
 # Expo generated files
 expo-env.d.ts
 
 # Development files
 .DS_Store
+**/.DS_Store
 *.log
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+lerna-debug.log*
 
 # Environment files
 .env
 .env*.local
+**/.env*.local
 
 # Git
 .git/
 .gitignore
+.gitattributes
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
 # TypeScript
 *.tsbuildinfo
+**/*.tsbuildinfo
 
 # Temporary files
 *.tmp
 *.temp
 .cache/
+**/.cache/
 
 # Metro
 .metro-health-check*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+.easignore
