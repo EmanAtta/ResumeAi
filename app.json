@@ -20,7 +20,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.emanatta.resumai"
+      "package": "com.amona.resumai"
     },
     "web": {
       "output": "static",
@@ -51,9 +51,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "b3b85ad9-72bb-48b8-b1da-1944224ab63a"
+        "projectId": "c3f9804d-f7c8-4b5e-83ba-39d4e88b4025"
       }
     },
-    "owner": "emanatta"
+    "owner": "abdelrhman_samy"
   }
 }
